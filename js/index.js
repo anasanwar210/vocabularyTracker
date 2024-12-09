@@ -1,27 +1,23 @@
-window.onload = function() {
-  document.getElementById("loading").classList.add("d-none"); 
-}
+window.onload = function () {
+  document.getElementById("loading").classList.add("d-none");
+};
 
 function toggleMode() {
   const body = document.body;
   const modeIcon = document.getElementById("modeIcon");
 
- 
   body.classList.toggle("dark-mode");
   body.classList.toggle("light-mode");
 
- 
   if (body.classList.contains("dark-mode")) {
     modeIcon.classList.remove("fa-sun");
     modeIcon.classList.add("fa-moon");
 
-   
     localStorage.setItem("mode", "dark");
   } else {
     modeIcon.classList.remove("fa-moon");
     modeIcon.classList.add("fa-sun");
 
-   
     localStorage.setItem("mode", "light");
   }
 }
@@ -52,8 +48,10 @@ function addWord() {
   let isDuplicate = false;
 
   rows.forEach((row) => {
-    const existingEnglishWord = row.querySelector("td:nth-child(1)").textContent;
-    const existingArabicMeaning = row.querySelector("td:nth-child(2)").textContent;
+    const existingEnglishWord =
+      row.querySelector("td:nth-child(1)").textContent;
+    const existingArabicMeaning =
+      row.querySelector("td:nth-child(2)").textContent;
 
     if (
       existingEnglishWord.toLowerCase() === englishWord.toLowerCase() ||
@@ -84,18 +82,14 @@ function addWord() {
 function addWordToTable(englishWord, arabicMeaning) {
   const listItem = createListItem(englishWord, arabicMeaning);
   document.getElementById("wordListContainer").appendChild(listItem);
-
   storeWordsInLocalStorage();
-
   resetInputs();
-
   Swal.fire({
     title: "Word Added!",
     text: "The word has been added successfully.",
     icon: "success",
   });
 }
-
 
 function createListItem(englishWord, arabicMeaning) {
   const row = document.createElement("tr");
@@ -120,7 +114,7 @@ function createListItem(englishWord, arabicMeaning) {
     "fa-trash"
   );
   const notesBtn = createButton(
-    "Add Notes",
+    "Notes",
     "btn-info",
     () => openNotesModal(row),
     "fa-sticky-note"
@@ -181,8 +175,6 @@ function deleteWord(row) {
   });
 }
 
-
-
 let currentItem = null;
 
 function openUpdateForm(row, englishWord, arabicMeaning) {
@@ -196,12 +188,11 @@ function openUpdateForm(row, englishWord, arabicMeaning) {
   currentItem = row;
   row.style.display = "none";
   window.oldEnglishWord = englishWord;
-  window.oldArabicMeaning = arabicMeaning; 
+  window.oldArabicMeaning = arabicMeaning;
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-  loadModeFromLocalStorage(); 
+  loadModeFromLocalStorage();
   const addButton = document.getElementById("addButton");
   const updateButton = document.getElementById("updateButton");
   const cancelButton = document.getElementById("cancelButton");
@@ -224,7 +215,7 @@ function validateInputs() {
 
   if (
     englishWordInput.value === "" ||
-    /[^a-zA-Z\s]/.test(englishWordInput.value)
+    /[^a-zA-Z\s\-\_\.]/.test(englishWordInput.value)
   ) {
     englishError.classList.remove("hidden");
     valid = false;
@@ -234,7 +225,7 @@ function validateInputs() {
 
   if (
     arabicMeaningInput.value === "" ||
-    /[^ء-ي\s]/.test(arabicMeaningInput.value)
+    /[^ء-ي\s\-\_\.]/.test(arabicMeaningInput.value)
   ) {
     arabicError.classList.remove("hidden");
     valid = false;
@@ -254,23 +245,23 @@ function handleWordAction() {
   }
 
   if (currentItem) {
-   
-    if (window.oldEnglishWord !== englishWord || window.oldArabicMeaning !== arabicMeaning) {
-     
+    if (
+      window.oldEnglishWord !== englishWord ||
+      window.oldArabicMeaning !== arabicMeaning
+    ) {
       let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
-      storedWords = storedWords.filter(word => word.word !== window.oldEnglishWord);
+      storedWords = storedWords.filter(
+        (word) => word.word !== window.oldEnglishWord
+      );
       localStorage.setItem("wordsList", JSON.stringify(storedWords));
 
-     
       const updatedWord = { word: englishWord, meaning: arabicMeaning };
       storedWords.push(updatedWord);
       localStorage.setItem("wordsList", JSON.stringify(storedWords));
 
-     
       currentItem.querySelector("td:nth-child(1)").textContent = englishWord;
       currentItem.querySelector("td:nth-child(2)").textContent = arabicMeaning;
 
-     
       document.getElementById("addButton").style.display = "inline-block";
       document.getElementById("updateButton").style.display = "none";
       document.getElementById("cancelButton").style.display = "none";
@@ -280,15 +271,12 @@ function handleWordAction() {
       currentItem = null;
     }
   } else {
-   
     const row = createListItem(englishWord, arabicMeaning);
     document.getElementById("wordListContainer").appendChild(row);
     storeWordsInLocalStorage();
     resetInputs();
   }
 }
-
-
 
 document.getElementById("searchWord").addEventListener("input", function (e) {
   const searchQuery = e.target.value.toLowerCase();
@@ -327,7 +315,6 @@ function storeWordsInLocalStorage() {
   localStorage.setItem("wordsList", JSON.stringify(wordsArray));
 }
 
-
 function loadWordsFromLocalStorage() {
   const storedWords = JSON.parse(localStorage.getItem("wordsList"));
 
@@ -338,7 +325,6 @@ function loadWordsFromLocalStorage() {
     });
   }
 }
-
 
 function openNotesModal(row) {
   const notesModal = document.getElementById("notesModal");
@@ -356,8 +342,9 @@ function openNotesModal(row) {
   savedNotes.forEach((note, index) => {
     const noteDiv = document.createElement("div");
     noteDiv.classList.add("note", "mt-3");
+    const formattedNote = note.replace(/\n/g, "<br>");
     noteDiv.innerHTML = `
-      <span>${note}</span>
+      <span>${formattedNote}</span>
       <div class="buttons">
         <button class="btn btn-sm btn-warning" onclick="updateNote(${index})"><i class="fa fa-edit"></i></button>
         <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})"><i class="fa fa-trash"></i></button>
@@ -456,7 +443,7 @@ function validateEnglishWord() {
   const englishError = document.getElementById("englishError");
   if (
     englishWordInput.value === "" ||
-    /[^a-zA-Z\s]/.test(englishWordInput.value)
+    /[^a-zA-Z\s\-\_\.]/.test(englishWordInput.value)
   ) {
     englishError.classList.remove("hidden");
     englishWordInput.classList.add("is-invalid");
@@ -473,7 +460,7 @@ function validateArabicMeaning() {
   const arabicError = document.getElementById("arabicError");
   if (
     arabicMeaningInput.value === "" ||
-    /[^ء-ي\s]/.test(arabicMeaningInput.value)
+    /[^ء-ي\s\-\_\.]/.test(arabicMeaningInput.value)
   ) {
     arabicError.classList.remove("hidden");
     arabicMeaningInput.classList.add("is-invalid");
