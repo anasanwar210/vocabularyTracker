@@ -1,18 +1,44 @@
+window.onload = function() {
+  document.getElementById("loading").classList.add("d-none"); 
+}
+
 function toggleMode() {
   const body = document.body;
   const modeIcon = document.getElementById("modeIcon");
 
-  // Toggle the class for dark and light mode
+ 
   body.classList.toggle("dark-mode");
   body.classList.toggle("light-mode");
 
-  // Update the icon based on the current mode
+ 
   if (body.classList.contains("dark-mode")) {
     modeIcon.classList.remove("fa-sun");
     modeIcon.classList.add("fa-moon");
+
+   
+    localStorage.setItem("mode", "dark");
   } else {
     modeIcon.classList.remove("fa-moon");
     modeIcon.classList.add("fa-sun");
+
+   
+    localStorage.setItem("mode", "light");
+  }
+}
+
+function loadModeFromLocalStorage() {
+  const savedMode = localStorage.getItem("mode");
+
+  if (savedMode === "dark") {
+    document.body.classList.add("dark-mode");
+    document.body.classList.remove("light-mode");
+    document.getElementById("modeIcon").classList.remove("fa-sun");
+    document.getElementById("modeIcon").classList.add("fa-moon");
+  } else {
+    document.body.classList.add("light-mode");
+    document.body.classList.remove("dark-mode");
+    document.getElementById("modeIcon").classList.remove("fa-moon");
+    document.getElementById("modeIcon").classList.add("fa-sun");
   }
 }
 
@@ -170,11 +196,12 @@ function openUpdateForm(row, englishWord, arabicMeaning) {
   currentItem = row;
   row.style.display = "none";
   window.oldEnglishWord = englishWord;
-  window.oldArabicMeaning = arabicMeaning;  // حفظ المعنى العربي القديم
+  window.oldArabicMeaning = arabicMeaning; 
 }
 
 
 document.addEventListener("DOMContentLoaded", function () {
+  loadModeFromLocalStorage(); 
   const addButton = document.getElementById("addButton");
   const updateButton = document.getElementById("updateButton");
   const cancelButton = document.getElementById("cancelButton");
@@ -227,23 +254,23 @@ function handleWordAction() {
   }
 
   if (currentItem) {
-    // عند تحديث الكلمة
+   
     if (window.oldEnglishWord !== englishWord || window.oldArabicMeaning !== arabicMeaning) {
-      // إزالة الكلمة القديمة من localStorage
+     
       let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
       storedWords = storedWords.filter(word => word.word !== window.oldEnglishWord);
       localStorage.setItem("wordsList", JSON.stringify(storedWords));
 
-      // إضافة الكلمة الجديدة
+     
       const updatedWord = { word: englishWord, meaning: arabicMeaning };
       storedWords.push(updatedWord);
       localStorage.setItem("wordsList", JSON.stringify(storedWords));
 
-      // تحديث الجدول
+     
       currentItem.querySelector("td:nth-child(1)").textContent = englishWord;
       currentItem.querySelector("td:nth-child(2)").textContent = arabicMeaning;
 
-      // إعادة عرض الأزرار وتحديث المدخلات
+     
       document.getElementById("addButton").style.display = "inline-block";
       document.getElementById("updateButton").style.display = "none";
       document.getElementById("cancelButton").style.display = "none";
@@ -253,7 +280,7 @@ function handleWordAction() {
       currentItem = null;
     }
   } else {
-    // إضافة كلمة جديدة
+   
     const row = createListItem(englishWord, arabicMeaning);
     document.getElementById("wordListContainer").appendChild(row);
     storeWordsInLocalStorage();

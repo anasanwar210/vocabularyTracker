@@ -5,14 +5,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Vocabulary Tracker">
-  <link rel="shortcut icon" href="imgs/favicon.png" type="image/x-icon">
+  <link rel="shortcut icon" href="imgs/favicon.webp" type="image/x-icon">
   <link rel="stylesheet" href="css/all.min.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/index.css">
   <title>Vocabulary Tracker</title>
 </head>
 
-<body class="light-mode">
+<body class="light-mode min-vh-100">
+  <div id="loading" class="">
+    <span class="loader"></span>
+  </div>
   <div class="container">
     <button id="modeIcon" class="btn fa fa-sun" onclick="toggleMode()" aria-label="Toggle Mode"></button>
     <h1 id="projectTitle" class="text-center">Vocabulary Tracker</h1>
