@@ -99,7 +99,7 @@ button {
 .btn {
   border-radius: 30px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-  /* width: fit-content; */
+  width: fit-content;
 }
 
 .btn-primary {
@@ -161,11 +161,10 @@ button {
   gap: 5px;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
 }
 
 #wordTable button {
-  padding: 8px 12px;
+  /* padding: 8px 12px; */
   border-radius: 5px;
   font-size: 14px;
 }
@@ -225,10 +224,30 @@ textarea:focus {
   align-items: center;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   padding: 10px;
+  margin: 10px 0;
   border-radius: 10px;
   background-color: rgba(0, 0, 0, 0.1);
 }
-.note span {
+
+.actions{
+  display: flex;
+  gap: 10px;
+}
+
+.note-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.note p {
+  color: #000;
+  margin-bottom: 0;
+  white-space: pre-line;
+}
+
+#notesList p {
   color: #000;
 }
 

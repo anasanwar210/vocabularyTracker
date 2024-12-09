@@ -22,6 +22,13 @@ function toggleMode() {
   }
 }
 
+function closeNotesModal() {
+  document.getElementById("notesModal").style.display = "none";
+  document
+    .querySelector("#wordListContainer .selected-word")
+    .classList.remove("selected-word");
+}
+
 function loadModeFromLocalStorage() {
   const savedMode = localStorage.getItem("mode");
 
@@ -39,49 +46,55 @@ function loadModeFromLocalStorage() {
 }
 
 function addWord() {
-  const englishWord = document.getElementById("englishWord").value.trim();
+  const englishWord = document
+    .getElementById("englishWord")
+    .value.trim()
+    .toLowerCase();
   const arabicMeaning = document.getElementById("arabicMeaning").value.trim();
 
   if (!validateInputs()) return;
 
-  const rows = document.querySelectorAll("#wordListContainer tr");
-  let isDuplicate = false;
+  const rows = Array.from(document.querySelectorAll("#wordListContainer tr"));
 
-  rows.forEach((row) => {
-    const existingEnglishWord =
-      row.querySelector("td:nth-child(1)").textContent;
-    const existingArabicMeaning =
-      row.querySelector("td:nth-child(2)").textContent;
+  const isDuplicate = rows.some((row) => {
+    const existingEnglishWord = row
+      .querySelector("td:nth-child(1)")
+      .textContent.trim()
+      .toLowerCase();
+    const existingArabicMeaning = row
+      .querySelector("td:nth-child(2)")
+      .textContent.trim();
 
-    if (
-      existingEnglishWord.toLowerCase() === englishWord.toLowerCase() ||
+    return (
+      existingEnglishWord === englishWord ||
       existingArabicMeaning === arabicMeaning
-    ) {
-      isDuplicate = true;
-    }
+    );
   });
 
   if (isDuplicate) {
     Swal.fire({
-      title: "Duplicate Word!",
-      text: "This word or meaning already exists. Do you want to add it again?",
+      title: "Duplicate Entry!",
+      text: "The word or its meaning already exists. Do you want to add this word again?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, add it!",
-      cancelButtonText: "No, cancel",
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
     }).then((result) => {
       if (result.isConfirmed) {
         addWordToTable(englishWord, arabicMeaning);
+      } else {
+        Swal.fire("Cancelled", "The word was not added.", "info");
       }
     });
-  } else {
-    addWordToTable(englishWord, arabicMeaning);
+    return;
   }
+
+  addWordToTable(englishWord, arabicMeaning);
 }
 
 function addWordToTable(englishWord, arabicMeaning) {
-  const listItem = createListItem(englishWord, arabicMeaning);
-  document.getElementById("wordListContainer").appendChild(listItem);
+  const row = createListItem(englishWord, arabicMeaning);
+  document.getElementById("wordListContainer").appendChild(row);
   storeWordsInLocalStorage();
   resetInputs();
   Swal.fire({
@@ -90,6 +103,229 @@ function addWordToTable(englishWord, arabicMeaning) {
     icon: "success",
   });
 }
+
+function openNotesModal(row) {
+  const englishWord = row.querySelector("td:nth-child(1)").textContent;
+  
+  // حفظ الكلمة النشطة بشكل واضح
+  document.getElementById("notesModal").setAttribute("data-active-word", englishWord);
+
+  const savedNotes =
+    JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+  const notesList = document.getElementById("notesList");
+  notesList.innerHTML = "";
+
+  if (savedNotes.length > 0) {
+    savedNotes.forEach((note, index) => {
+      const noteElement = document.createElement("div");
+      noteElement.classList.add("note");
+      noteElement.style.backgroundColor = note.color;
+
+      const noteText = document.createElement("p");
+      noteText.textContent = note.text;
+      noteElement.appendChild(noteText);
+
+      const actions = document.createElement("div");
+      actions.classList.add("actions");
+
+      const updateButton = createIconButton("fa-edit", () =>
+        updateNote(index, englishWord)
+      );
+
+      const deleteButton = createIconButton("fa-trash", () =>
+        deleteNote(index, englishWord)
+      );
+
+      actions.appendChild(updateButton);
+      actions.appendChild(deleteButton);
+      noteElement.appendChild(actions);
+
+      notesList.appendChild(noteElement);
+    });
+  } else {
+    notesList.innerHTML = "<p>No notes for this word.</p>";
+  }
+
+  document.getElementById("notesModal").style.display = "block";
+}
+
+
+function createIconButton(iconClass, onClickFunction) {
+  const button = document.createElement("button");
+  button.classList.add("btn", "btn-sm", "note-action-btn");
+
+  if (iconClass === "fa-edit") {
+    button.classList.add("btn-primary");
+  } else if (iconClass === "fa-trash") {
+    button.classList.add("btn-danger");
+  }
+
+  button.onclick = onClickFunction;
+
+  const icon = document.createElement("i");
+  icon.classList.add("fa", iconClass);
+  button.appendChild(icon);
+
+  return button;
+}
+
+function updateNote(noteIndex, englishWord) {
+  const savedNotes =
+    JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+  const note = savedNotes[noteIndex];
+
+  document.getElementById("notesText").value = note.text;
+
+  const notesList = document.getElementById("notesList");
+  notesList.children[noteIndex].classList.add("hidden");
+
+  const saveButton = document.getElementById("saveButton");
+  saveButton.textContent = "Update Note";
+  saveButton.onclick = () => saveUpdatedNote(noteIndex, englishWord);
+}
+
+
+function saveUpdatedNote(noteIndex, englishWord) {
+  const notesText = document.getElementById("notesText").value.trim();
+  if (!notesText) {
+    Swal.fire("Error", "Please write a note first!", "error");
+    return;
+  }
+
+  let currentNotes =
+    JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+  currentNotes[noteIndex] = {
+    text: notesText,
+    color: currentNotes[noteIndex].color,
+  };
+
+  localStorage.setItem("notes-" + englishWord, JSON.stringify(currentNotes));
+
+  loadNotesFromLocalStorage(englishWord);
+
+  document.getElementById("notesText").value = "";
+
+  Swal.fire("Updated!", "Your note has been updated successfully.", "success");
+}
+
+function closeNotesModal() {
+  document.getElementById("notesModal").style.display = "none";
+}
+
+function saveNotes() {
+  const notesText = document.getElementById("notesText").value.trim();
+  const notesModal = document.getElementById("notesModal");
+  const englishWord = notesModal.getAttribute("data-active-word");
+
+  if (!notesText) {
+    Swal.fire("Error", "Please write a note first!", "error");
+    return;
+  }
+
+  let currentNotes =
+    JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+
+  const note = {
+    text: notesText,
+    color: getRandomColor(),
+  };
+
+  currentNotes.push(note);
+
+  localStorage.setItem("notes-" + englishWord, JSON.stringify(currentNotes));
+
+  loadNotesFromLocalStorage(englishWord);
+
+  document.getElementById("notesText").value = "";
+
+  Swal.fire("Success", "Note saved!", "success");
+}
+
+
+function getRandomColor() {
+  const colors = ["#FFDDC1", "#C1E1DC", "#FFABAB", "#FFC3A0", "#FF677D"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function deleteNote(noteIndex, englishWord) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Do you really want to delete this note?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, delete it!",
+    cancelButtonText: "No, keep it",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      let currentNotes =
+        JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+      currentNotes.splice(noteIndex, 1);
+
+      if (currentNotes.length === 0) {
+        localStorage.removeItem("notes-" + englishWord);
+      } else {
+        localStorage.setItem(
+          "notes-" + englishWord,
+          JSON.stringify(currentNotes)
+        );
+      }
+
+      loadNotesFromLocalStorage(englishWord);
+
+      Swal.fire("Deleted!", "Your note has been deleted.", "success");
+    }
+  });
+}
+
+
+function loadWordsFromLocalStorage() {
+  const words = JSON.parse(localStorage.getItem("wordsList")) || [];
+
+  words.forEach(({ word, meaning }) => {
+    addWordToTable(word, meaning, false);
+
+    loadNotesFromLocalStorage(word);
+  });
+}
+
+function loadNotesFromLocalStorage(englishWord) {
+  if (!englishWord) return;
+
+  const savedNotes =
+    JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+  const notesList = document.getElementById("notesList");
+
+  if (notesList) {
+    notesList.innerHTML = "";
+
+    savedNotes.forEach((note, index) => {
+      const noteElement = document.createElement("div");
+      noteElement.classList.add("note");
+      noteElement.style.backgroundColor = note.color;
+
+      const noteText = document.createElement("p");
+      noteText.textContent = note.text;
+      noteElement.appendChild(noteText);
+
+      const actions = document.createElement("div");
+      actions.classList.add("note-actions");
+
+      const updateButton = createIconButton("fa-edit", () =>
+        updateNote(index, englishWord)
+      );
+      const deleteButton = createIconButton("fa-trash", () =>
+        deleteNote(index, englishWord)
+      );
+
+      actions.appendChild(updateButton);
+      actions.appendChild(deleteButton);
+      noteElement.appendChild(actions);
+
+      notesList.appendChild(noteElement);
+    });
+  }
+}
+
 
 function createListItem(englishWord, arabicMeaning) {
   const row = document.createElement("tr");
@@ -100,6 +336,9 @@ function createListItem(englishWord, arabicMeaning) {
   meaningCell.textContent = arabicMeaning;
 
   const actionsCell = document.createElement("td");
+
+  const actionsDiv = document.createElement("div");
+  actionsDiv.classList.add("actions");
 
   const updateBtn = createButton(
     "Update",
@@ -120,9 +359,16 @@ function createListItem(englishWord, arabicMeaning) {
     "fa-sticky-note"
   );
 
-  actionsCell.appendChild(updateBtn);
-  actionsCell.appendChild(deleteBtn);
-  actionsCell.appendChild(notesBtn);
+  notesBtn.onclick = function () {
+    row.classList.add("selected-word");
+    openNotesModal(row);
+  };
+
+  actionsDiv.appendChild(updateBtn);
+  actionsDiv.appendChild(deleteBtn);
+  actionsDiv.appendChild(notesBtn);
+
+  actionsCell.appendChild(actionsDiv);
 
   row.appendChild(wordCell);
   row.appendChild(meaningCell);
@@ -163,7 +409,6 @@ function deleteWord(row) {
       localStorage.removeItem("notes-" + englishWord);
 
       let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
-
       storedWords = storedWords.filter((word) => word.word !== englishWord);
 
       localStorage.setItem("wordsList", JSON.stringify(storedWords));
@@ -240,62 +485,78 @@ function handleWordAction() {
   const englishWord = document.getElementById("englishWord").value.trim();
   const arabicMeaning = document.getElementById("arabicMeaning").value.trim();
 
-  if (!validateInputs()) {
-    return;
-  }
-
-  if (currentItem) {
-    if (
-      window.oldEnglishWord !== englishWord ||
-      window.oldArabicMeaning !== arabicMeaning
-    ) {
-      let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
-      storedWords = storedWords.filter(
-        (word) => word.word !== window.oldEnglishWord
-      );
-      localStorage.setItem("wordsList", JSON.stringify(storedWords));
-
-      const updatedWord = { word: englishWord, meaning: arabicMeaning };
-      storedWords.push(updatedWord);
-      localStorage.setItem("wordsList", JSON.stringify(storedWords));
-
-      currentItem.querySelector("td:nth-child(1)").textContent = englishWord;
-      currentItem.querySelector("td:nth-child(2)").textContent = arabicMeaning;
-
-      document.getElementById("addButton").style.display = "inline-block";
-      document.getElementById("updateButton").style.display = "none";
-      document.getElementById("cancelButton").style.display = "none";
-
-      resetInputs();
-      currentItem.style.display = "table-row";
-      currentItem = null;
-    }
+  if (currentItem === null) {
+    addWord();
   } else {
-    const row = createListItem(englishWord, arabicMeaning);
-    document.getElementById("wordListContainer").appendChild(row);
-    storeWordsInLocalStorage();
-    resetInputs();
+    updateWord();
   }
 }
 
-document.getElementById("searchWord").addEventListener("input", function (e) {
-  const searchQuery = e.target.value.toLowerCase();
-  const rows = document.querySelectorAll("#wordListContainer tr");
+function handleCancelAction() {
+  resetInputs();
+  currentItem.style.display = "table-row";
+  document.getElementById("addButton").style.display = "inline-block";
+  document.getElementById("updateButton").style.display = "none";
+  document.getElementById("cancelButton").style.display = "none";
+}
 
-  rows.forEach(function (row) {
-    const wordText = row
-      .querySelector("td:nth-child(1)")
-      .textContent.toLowerCase();
-    const meaningText = row
-      .querySelector("td:nth-child(2)")
-      .textContent.toLowerCase();
+function updateWord() {
+  const newEnglishWord = document.getElementById("englishWord").value.trim();
+  const newArabicMeaning = document.getElementById("arabicMeaning").value.trim();
 
-    row.style.display =
-      wordText.includes(searchQuery) || meaningText.includes(searchQuery)
-        ? "table-row"
-        : "none";
+  if (!validateInputs()) return;
+
+  
+  currentItem.querySelector("td:nth-child(1)").textContent = newEnglishWord;
+  currentItem.querySelector("td:nth-child(2)").textContent = newArabicMeaning;
+
+  
+  let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
+
+  
+  storedWords = storedWords.map((word) =>
+    word.word === window.oldEnglishWord
+      ? { word: newEnglishWord, meaning: newArabicMeaning }
+      : word
+  );
+
+  
+  localStorage.setItem("wordsList", JSON.stringify(storedWords));
+
+  
+  const oldNotes = JSON.parse(localStorage.getItem("notes-" + window.oldEnglishWord)) || [];
+  if (oldNotes.length > 0) {
+    
+    localStorage.removeItem("notes-" + window.oldEnglishWord);
+    
+    localStorage.setItem("notes-" + newEnglishWord, JSON.stringify(oldNotes));
+  }
+
+  
+  window.oldEnglishWord = newEnglishWord;
+  window.oldArabicMeaning = newArabicMeaning;
+
+  
+  loadNotesFromLocalStorage(newEnglishWord); 
+
+  resetInputs();
+
+  Swal.fire({
+    title: "Word Updated!",
+    text: "The word has been updated successfully.",
+    icon: "success",
   });
-});
+
+  
+  document.getElementById("addButton").style.display = "inline-block";
+  document.getElementById("updateButton").style.display = "none";
+  document.getElementById("cancelButton").style.display = "none";
+
+  currentItem.style.display = "table-row";
+  currentItem = null;
+  location.reload();
+}
+
 
 function resetInputs() {
   document.getElementById("englishWord").value = "";
@@ -303,171 +564,48 @@ function resetInputs() {
 }
 
 function storeWordsInLocalStorage() {
-  const rows = document.querySelectorAll("#wordListContainer tr");
-  const wordsArray = [];
-
-  rows.forEach(function (row) {
-    const wordText = row.querySelector("td:nth-child(1)").textContent;
-    const meaningText = row.querySelector("td:nth-child(2)").textContent;
-    wordsArray.push({ word: wordText, meaning: meaningText });
+  const rows = Array.from(document.querySelectorAll("#wordListContainer tr"));
+  const words = rows.map((row) => {
+    const englishWord = row.querySelector("td:nth-child(1)").textContent;
+    const arabicMeaning = row.querySelector("td:nth-child(2)").textContent;
+    return { word: englishWord, meaning: arabicMeaning };
   });
 
-  localStorage.setItem("wordsList", JSON.stringify(wordsArray));
+  
+  localStorage.setItem("wordsList", JSON.stringify(words));
 }
 
 function loadWordsFromLocalStorage() {
-  const storedWords = JSON.parse(localStorage.getItem("wordsList"));
+  const words = JSON.parse(localStorage.getItem("wordsList")) || [];
 
-  if (storedWords && storedWords.length > 0) {
-    storedWords.forEach(function (wordData) {
-      const row = createListItem(wordData.word, wordData.meaning);
-      document.getElementById("wordListContainer").appendChild(row);
+  words.forEach(({ word, meaning }) => {
+    addWordToTable(word, meaning, false);
+  });
+}
+
+function addWordToTable(englishWord, arabicMeaning, showSuccessMessage = true) {
+  const formattedEnglishWord = capitalizeWord(englishWord);
+  const formattedArabicMeaning = capitalizeWord(arabicMeaning);
+
+  const row = createListItem(formattedEnglishWord, formattedArabicMeaning);
+  document.getElementById("wordListContainer").appendChild(row);
+  
+  storeWordsInLocalStorage(); 
+  resetInputs();
+
+  if (showSuccessMessage) {
+    Swal.fire({
+      title: "Word Added!",
+      text: "The word has been added successfully.",
+      icon: "success",
     });
   }
 }
 
-function openNotesModal(row) {
-  const notesModal = document.getElementById("notesModal");
-  const notesText = document.getElementById("notesText");
-  const notesList = document.getElementById("notesList");
 
-  const savedNotes =
-    JSON.parse(
-      localStorage.getItem(
-        "notes-" + row.querySelector("td:nth-child(1)").textContent
-      )
-    ) || [];
-  notesList.innerHTML = "";
-
-  savedNotes.forEach((note, index) => {
-    const noteDiv = document.createElement("div");
-    noteDiv.classList.add("note", "mt-3");
-    const formattedNote = note.replace(/\n/g, "<br>");
-    noteDiv.innerHTML = `
-      <span>${formattedNote}</span>
-      <div class="buttons">
-        <button class="btn btn-sm btn-warning" onclick="updateNote(${index})"><i class="fa fa-edit"></i></button>
-        <button class="btn btn-sm btn-danger" onclick="deleteNote(${index})"><i class="fa fa-trash"></i></button>
-      </div>`;
-    notesList.appendChild(noteDiv);
-  });
-
-  currentItem = row;
-  notesModal.style.display = "flex";
-}
-
-function closeNotesModal() {
-  document.getElementById("notesModal").style.display = "none";
-  document.getElementById("notesText").value = "";
-  document.getElementById("notesList").innerHTML = "";
-}
-
-function saveNotes() {
-  const notesText = document.getElementById("notesText").value.trim();
-
-  if (notesText) {
-    let savedNotes =
-      JSON.parse(
-        localStorage.getItem(
-          "notes-" + currentItem.querySelector("td:nth-child(1)").textContent
-        )
-      ) || [];
-    savedNotes.push(notesText);
-    localStorage.setItem(
-      "notes-" + currentItem.querySelector("td:nth-child(1)").textContent,
-      JSON.stringify(savedNotes)
-    );
-
-    openNotesModal(currentItem);
-    document.getElementById("notesText").value = "";
-  } else {
-    alert("Please enter a note!");
-  }
-}
-
-function updateNote(index) {
-  const updatedNote = prompt(
-    "Update your note:",
-    document.querySelectorAll(".note span")[index].textContent
-  );
-
-  if (updatedNote) {
-    let savedNotes = JSON.parse(
-      localStorage.getItem(
-        "notes-" + currentItem.querySelector("td:nth-child(1)").textContent
-      )
-    );
-    savedNotes[index] = updatedNote;
-    localStorage.setItem(
-      "notes-" + currentItem.querySelector("td:nth-child(1)").textContent,
-      JSON.stringify(savedNotes)
-    );
-    openNotesModal(currentItem);
-  }
-}
-
-function deleteNote(index) {
-  let savedNotes = JSON.parse(
-    localStorage.getItem(
-      "notes-" + currentItem.querySelector("td:nth-child(1)").textContent
-    )
-  );
-  savedNotes.splice(index, 1);
-  localStorage.setItem(
-    "notes-" + currentItem.querySelector("td:nth-child(1)").textContent,
-    JSON.stringify(savedNotes)
-  );
-  openNotesModal(currentItem);
-}
-
-function handleCancelAction() {
-  document.getElementById("addButton").style.display = "inline-block";
-  document.getElementById("updateButton").style.display = "none";
-  document.getElementById("cancelButton").style.display = "none";
-
-  currentItem.style.display = "table-row";
-  resetInputs();
-  currentItem = null;
-}
-
-document.getElementById("englishWord").addEventListener("input", function () {
-  validateEnglishWord();
-});
-
-document.getElementById("arabicMeaning").addEventListener("input", function () {
-  validateArabicMeaning();
-});
-
-function validateEnglishWord() {
-  const englishWordInput = document.getElementById("englishWord");
-  const englishError = document.getElementById("englishError");
-  if (
-    englishWordInput.value === "" ||
-    /[^a-zA-Z\s\-\_\.]/.test(englishWordInput.value)
-  ) {
-    englishError.classList.remove("hidden");
-    englishWordInput.classList.add("is-invalid");
-    englishWordInput.classList.remove("is-valid");
-  } else {
-    englishError.classList.add("hidden");
-    englishWordInput.classList.add("is-valid");
-    englishWordInput.classList.remove("is-invalid");
-  }
-}
-
-function validateArabicMeaning() {
-  const arabicMeaningInput = document.getElementById("arabicMeaning");
-  const arabicError = document.getElementById("arabicError");
-  if (
-    arabicMeaningInput.value === "" ||
-    /[^ء-ي\s\-\_\.]/.test(arabicMeaningInput.value)
-  ) {
-    arabicError.classList.remove("hidden");
-    arabicMeaningInput.classList.add("is-invalid");
-    arabicMeaningInput.classList.remove("is-valid");
-  } else {
-    arabicError.classList.add("hidden");
-    arabicMeaningInput.classList.add("is-valid");
-    arabicMeaningInput.classList.remove("is-invalid");
-  }
+function capitalizeWord(word) {
+  return word
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
 }

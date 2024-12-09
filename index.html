@@ -13,7 +13,7 @@
 </head>
 
 <body class="light-mode min-vh-100">
-  <div id="loading" class="">
+  <div id="loading" class="d-flex justify-content-center align-items-center">
     <span class="loader"></span>
   </div>
   <div class="container">
@@ -22,12 +22,12 @@
     <input type="text" id="englishWord" placeholder="Enter English word">
     <input type="text" id="arabicMeaning" placeholder="Enter Arabic meaning">
 
-    <p id="englishError" class="hidden">Invalid English word</p>
-    <p id="arabicError" class="hidden">Invalid Arabic meaning</p>
+    <p id="englishError" class="hidden text-danger">Invalid English word</p>
+    <p id="arabicError" class="hidden text-danger">Invalid Arabic meaning</p>
 
-    <button id="addButton" class="btn btn-primary">Add</button>
-    <button id="updateButton" class="btn btn-warning" style="display:none;">Update</button>
-    <button id="cancelButton" class="btn btn-danger p-" style="display:none;">Cancel</button>
+    <button id="addButton" class="btn btn-primary w-100 m-auto">Add</button>
+    <button id="updateButton" class="btn btn-warning w-100 mb-0" style="display:none;">Update</button>
+    <button id="cancelButton" class="btn btn-danger w-100" style="display:none;">Cancel</button>
 
     <input type="text" id="searchWord" placeholder="Search for words" class="search-bar">
 
@@ -44,27 +44,24 @@
     </table>
   </div>
 
-    <div id="notesModal" class="modal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header d-flex justify-content-between">
-            <h5 class="modal-title">Add Notes</h5>
-            <button type="button" class="close btn btn-danger" onclick="closeNotesModal()">&times;</button>
-          </div>
-          <div class="modal-body">
-            <textarea id="notesText" class="form-control" rows="5" placeholder="Write your notes here..."></textarea>
-            <div id="notesList"></div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="saveNotes()">Save Note</button>
-            <button type="button" class="btn btn-secondary" onclick="closeNotesModal()">Close</button>
-          </div>
+  <div id="notesModal" class="modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between">
+          <h5 class="modal-title">Add Notes</h5>
+          <button type="button" class="close btn btn-danger" onclick="closeNotesModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <textarea id="notesText" class="form-control" rows="5" placeholder="Write your notes here..."></textarea>
+          <div id="notesList"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="saveNotes()">Save Note</button>
+          <button type="button" class="btn btn-secondary" onclick="closeNotesModal()">Close</button>
         </div>
       </div>
     </div>
-
-
-
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -72,7 +69,5 @@
   <script src="js/bootstrap.bundle.min.js"></script>
   <script src="js/index.js"></script>
 </body>
-
-
 
 </html>
