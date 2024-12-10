@@ -609,3 +609,20 @@ function capitalizeWord(word) {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(" ");
 }
+
+function searchWords() {
+  const searchInput = document.getElementById("searchInput").value.trim().toLowerCase();
+  const rows = Array.from(document.querySelectorAll("#wordListContainer tr"));
+
+  rows.forEach((row) => {
+    const englishWord = row.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
+    const arabicMeaning = row.querySelector("td:nth-child(2)").textContent.trim().toLowerCase();
+
+    // تحقق إذا كان النص المدخل موجودًا في الكلمة الإنجليزية أو المعنى العربي
+    if (englishWord.includes(searchInput) || arabicMeaning.includes(searchInput)) {
+      row.style.display = ""; // عرض الصف
+    } else {
+      row.style.display = "none"; // إخفاء الصف
+    }
+  });
+}

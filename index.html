@@ -29,7 +29,15 @@
     <button id="updateButton" class="btn btn-warning w-100 mb-0" style="display:none;">Update</button>
     <button id="cancelButton" class="btn btn-danger w-100" style="display:none;">Cancel</button>
 
-    <input type="text" id="searchWord" placeholder="Search for words" class="search-bar">
+    <div class="search-container">
+      <input
+        type="text"
+        id="searchInput"
+        class="form-control"
+        placeholder="Search for a word"
+        onkeyup="searchWords()"
+      />
+    </div>
 
     <table id="wordTable" class="table table-bordered">
       <thead>
