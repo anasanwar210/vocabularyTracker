@@ -106,9 +106,11 @@ function addWordToTable(englishWord, arabicMeaning) {
 
 function openNotesModal(row) {
   const englishWord = row.querySelector("td:nth-child(1)").textContent;
+
   
-  // حفظ الكلمة النشطة بشكل واضح
-  document.getElementById("notesModal").setAttribute("data-active-word", englishWord);
+  document
+    .getElementById("notesModal")
+    .setAttribute("data-active-word", englishWord);
 
   const savedNotes =
     JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
@@ -149,7 +151,6 @@ function openNotesModal(row) {
   document.getElementById("notesModal").style.display = "block";
 }
 
-
 function createIconButton(iconClass, onClickFunction) {
   const button = document.createElement("button");
   button.classList.add("btn", "btn-sm", "note-action-btn");
@@ -184,7 +185,6 @@ function updateNote(noteIndex, englishWord) {
   saveButton.onclick = () => saveUpdatedNote(noteIndex, englishWord);
 }
 
-
 function saveUpdatedNote(noteIndex, englishWord) {
   const notesText = document.getElementById("notesText").value.trim();
   if (!notesText) {
@@ -192,21 +192,50 @@ function saveUpdatedNote(noteIndex, englishWord) {
     return;
   }
 
+  
   let currentNotes =
     JSON.parse(localStorage.getItem("notes-" + englishWord)) || [];
+
+  
   currentNotes[noteIndex] = {
     text: notesText,
-    color: currentNotes[noteIndex].color,
+    color: currentNotes[noteIndex].color, 
   };
 
+  
   localStorage.setItem("notes-" + englishWord, JSON.stringify(currentNotes));
 
+  
   loadNotesFromLocalStorage(englishWord);
 
+  
   document.getElementById("notesText").value = "";
 
   Swal.fire("Updated!", "Your note has been updated successfully.", "success");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function closeNotesModal() {
   document.getElementById("notesModal").style.display = "none";
@@ -240,7 +269,6 @@ function saveNotes() {
 
   Swal.fire("Success", "Note saved!", "success");
 }
-
 
 function getRandomColor() {
   const colors = ["#FFDDC1", "#C1E1DC", "#FFABAB", "#FFC3A0", "#FF677D"];
@@ -276,7 +304,6 @@ function deleteNote(noteIndex, englishWord) {
     }
   });
 }
-
 
 function loadWordsFromLocalStorage() {
   const words = JSON.parse(localStorage.getItem("wordsList")) || [];
@@ -325,7 +352,6 @@ function loadNotesFromLocalStorage(englishWord) {
     });
   }
 }
-
 
 function createListItem(englishWord, arabicMeaning) {
   const row = document.createElement("tr");
@@ -502,42 +528,37 @@ function handleCancelAction() {
 
 function updateWord() {
   const newEnglishWord = document.getElementById("englishWord").value.trim();
-  const newArabicMeaning = document.getElementById("arabicMeaning").value.trim();
+  const newArabicMeaning = document
+    .getElementById("arabicMeaning")
+    .value.trim();
 
   if (!validateInputs()) return;
 
-  
   currentItem.querySelector("td:nth-child(1)").textContent = newEnglishWord;
   currentItem.querySelector("td:nth-child(2)").textContent = newArabicMeaning;
 
-  
   let storedWords = JSON.parse(localStorage.getItem("wordsList")) || [];
 
-  
   storedWords = storedWords.map((word) =>
     word.word === window.oldEnglishWord
       ? { word: newEnglishWord, meaning: newArabicMeaning }
       : word
   );
 
-  
   localStorage.setItem("wordsList", JSON.stringify(storedWords));
 
-  
-  const oldNotes = JSON.parse(localStorage.getItem("notes-" + window.oldEnglishWord)) || [];
+  const oldNotes =
+    JSON.parse(localStorage.getItem("notes-" + window.oldEnglishWord)) || [];
   if (oldNotes.length > 0) {
-    
     localStorage.removeItem("notes-" + window.oldEnglishWord);
-    
+
     localStorage.setItem("notes-" + newEnglishWord, JSON.stringify(oldNotes));
   }
 
-  
   window.oldEnglishWord = newEnglishWord;
   window.oldArabicMeaning = newArabicMeaning;
 
-  
-  loadNotesFromLocalStorage(newEnglishWord); 
+  loadNotesFromLocalStorage(newEnglishWord);
 
   resetInputs();
 
@@ -547,7 +568,6 @@ function updateWord() {
     icon: "success",
   });
 
-  
   document.getElementById("addButton").style.display = "inline-block";
   document.getElementById("updateButton").style.display = "none";
   document.getElementById("cancelButton").style.display = "none";
@@ -556,7 +576,6 @@ function updateWord() {
   currentItem = null;
   location.reload();
 }
-
 
 function resetInputs() {
   document.getElementById("englishWord").value = "";
@@ -571,7 +590,6 @@ function storeWordsInLocalStorage() {
     return { word: englishWord, meaning: arabicMeaning };
   });
 
-  
   localStorage.setItem("wordsList", JSON.stringify(words));
 }
 
@@ -589,8 +607,8 @@ function addWordToTable(englishWord, arabicMeaning, showSuccessMessage = true) {
 
   const row = createListItem(formattedEnglishWord, formattedArabicMeaning);
   document.getElementById("wordListContainer").appendChild(row);
-  
-  storeWordsInLocalStorage(); 
+
+  storeWordsInLocalStorage();
   resetInputs();
 
   if (showSuccessMessage) {
@@ -602,7 +620,6 @@ function addWordToTable(englishWord, arabicMeaning, showSuccessMessage = true) {
   }
 }
 
-
 function capitalizeWord(word) {
   return word
     .split(" ")
@@ -611,18 +628,30 @@ function capitalizeWord(word) {
 }
 
 function searchWords() {
-  const searchInput = document.getElementById("searchInput").value.trim().toLowerCase();
+  const searchInput = document
+    .getElementById("searchInput")
+    .value.trim()
+    .toLowerCase();
   const rows = Array.from(document.querySelectorAll("#wordListContainer tr"));
 
   rows.forEach((row) => {
-    const englishWord = row.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
-    const arabicMeaning = row.querySelector("td:nth-child(2)").textContent.trim().toLowerCase();
+    const englishWord = row
+      .querySelector("td:nth-child(1)")
+      .textContent.trim()
+      .toLowerCase();
+    const arabicMeaning = row
+      .querySelector("td:nth-child(2)")
+      .textContent.trim()
+      .toLowerCase();
 
-    // تحقق إذا كان النص المدخل موجودًا في الكلمة الإنجليزية أو المعنى العربي
-    if (englishWord.includes(searchInput) || arabicMeaning.includes(searchInput)) {
-      row.style.display = ""; // عرض الصف
+    
+    if (
+      englishWord.includes(searchInput) ||
+      arabicMeaning.includes(searchInput)
+    ) {
+      row.style.display = ""; 
     } else {
-      row.style.display = "none"; // إخفاء الصف
+      row.style.display = "none"; 
     }
   });
 }
